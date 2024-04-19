@@ -41,7 +41,6 @@ public class Main {
         PGX_USERNAME       = System.getenv("PGX_USERNAME").replace("\"","");
         PGX_PASSWORD       = System.getenv("PGX_PASSWORD").replace("\"","");
         PGX_GRAPH_NAME     = System.getenv("PGX_GRAPH_NAME").replace("\"","");
-        PGX_CONFIG_FILE    = System.getenv("PGX_CONFIG_FILE").replace("\"","");
     }
 
     public static void loadGraph() throws Exception {

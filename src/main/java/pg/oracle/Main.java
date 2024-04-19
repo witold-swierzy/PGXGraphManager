@@ -84,8 +84,12 @@ public class Main {
                 System.out.println("Synchronization completed");
                 System.out.println("Number of edges    : "+PGX_GRAPH.getNumEdges());
                 System.out.println("Number of vertices : "+PGX_GRAPH.getNumVertices());
-                System.out.print("Enter Y to continue and N to break and complete the job : ");
-                inputChar = br.readLine();
+                System.out.print("Do you want to continue (Y/N) ? ");
+                    inputChar = br.readLine();
+                    while (!inputChar.equalsIgnoreCase("Y") && !inputChar.equalsIgnoreCase("N") ) {
+                        System.out.println("Incorrect key. Please, choose again (Y/N)");
+                        inputChar = br.readLine();
+                    }
             }
             System.out.println("Exiting...");
         }

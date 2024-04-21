@@ -38,10 +38,12 @@ public class GraphThread implements Runnable {
         long startMs, execMs;
         boolean continueRun = true;
         File syncLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".synclabel"),
-             stopLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".stoplabel");
+             stopThreadLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".stoplabel");
         while (continueRun) {
             try {
-                while (!syncLabel.exists() && !stopLabel.exists())
+                while ( !syncLabel.exists() &&
+                        !stopThreadLabel.exists() &&
+                        !Main.PGX_STOP_PGM_LABEL.exists() )
                     Thread.sleep(1000);
                 if (syncLabel.exists()) {
                     System.out.println("Synchronization for graph "+this.graphName+" started.");
@@ -49,17 +51,21 @@ public class GraphThread implements Runnable {
                     this.graph = this.synchronizer.sync();
                     syncLabel.delete();
                     execMs = System.currentTimeMillis() - startMs;
-                    System.out.println("Graph "+this.graphName+" synchronized succesfully.");
+                    System.out.println("Graph "+this.graphName+" synchronized successfully.");
                     System.out.println("Synchronization time : "+execMs);
                     System.out.println("Number of vertices   : "+this.graph.getNumVertices());
                     System.out.println("Number of edges      : "+this.graph.getNumEdges());
                     this.numOfSyncs ++;
                     this.syncTime += execMs;
-                } else {
+                } else if (stopThreadLabel.exists()) {
                     continueRun = false;
                     this.dbConnection.close();
                     this.pgxConnection.close();
-                    stopLabel.delete();
+                    stopThreadLabel.delete();
+                } else {
+                    continueRun = false;
+                    this.dbConnection.close ();
+                    this.pgxConnection.close();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

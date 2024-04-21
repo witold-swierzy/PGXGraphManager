@@ -1,4 +1,4 @@
-# Property Graph Server Graph Manager
+# Property Graph Manager
 
 This repository contains source code of a small Java application, which can be used to synchronize published property graphs with tables used in its definition.
 This application supports synchronization of multiple graphs loaded and published in a PGX server instance. 

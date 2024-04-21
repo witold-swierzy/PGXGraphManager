@@ -72,7 +72,7 @@ public class GraphThread implements Runnable {
                 continueRun = false;
             }
         }
-        System.out.println("Synchronization thread for graph "+this.graphName+" stopped succesfully.");
+        System.out.println("Synchronization thread for graph "+this.graphName+" stopped successfully.");
         System.out.println("Total number of synchronizations : "+this.numOfSyncs);
         System.out.println("Total synchronization time (ms)  : "+this.syncTime);
         Main.PGX_NUMBER_OF_THREADS--;

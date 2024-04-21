@@ -18,7 +18,7 @@ public class Main {
     static long PGX_TOTAL_SYNC_TIME = 0;
     static long PGX_TOTAL_NUMBER_OF_SYNCS = 0;
     static long PGX_NUMBER_OF_THREADS = 0;
-    static long PGX_UPTIME = 0;
+    static long PGX_UPTIME = System.currentTimeMillis();
     public static void initApp() throws Exception {
         PGX_RELOAD = Boolean.parseBoolean(System.getenv("PGX_RELOAD").replace("\"",""));
         PGX_URL    = System.getenv("PGX_URL").replace("\"","");
@@ -43,7 +43,6 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            PGX_UPTIME = System.currentTimeMillis();
             System.out.println("Initializing PropertyGraphManager...");
             initApp();
             System.out.print("Waiting for all threads to finish their initialization processes.");

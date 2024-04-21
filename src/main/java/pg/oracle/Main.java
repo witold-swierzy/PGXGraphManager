@@ -19,6 +19,7 @@ public class Main {
     static long PGX_TOTAL_NUMBER_OF_SYNCS = 0;
     static long PGX_NUMBER_OF_THREADS = 0;
     static long PGX_UPTIME = System.currentTimeMillis();
+
     public static void initApp() throws Exception {
         PGX_RELOAD = Boolean.parseBoolean(System.getenv("PGX_RELOAD").replace("\"",""));
         PGX_URL    = System.getenv("PGX_URL").replace("\"","");

@@ -12,8 +12,8 @@ public class GraphThread implements Runnable {
     private PgxSession pgxConnection;
     private PgxGraph graph;
     private Synchronizer synchronizer;
-    private long numOfSynchronizations = 0,
-                 synchronizationTime   = 0;
+    private long numOfSyncs = 0,
+                 syncTime   = 0;
     public GraphThread(String graphName) throws Exception {
         System.out.println("Initializing thread for graph : "+graphName);
         this.graphName     = graphName;
@@ -30,7 +30,7 @@ public class GraphThread implements Runnable {
                         .forPartitioned()
                         .fromJson(this.graph.getConfig().toString()))
                 .build();
-        Main.numberOfThreads++;
+        Main.PGX_NUMBER_OF_THREADS++;
         System.out.println("Graph "+graphName+" initialized successfully.");
     }
 
@@ -53,8 +53,8 @@ public class GraphThread implements Runnable {
                     System.out.println("Synchronization time : "+execMs);
                     System.out.println("Number of vertices   : "+this.graph.getNumVertices());
                     System.out.println("Number of edges      : "+this.graph.getNumEdges());
-                    this.numOfSynchronizations ++;
-                    this.synchronizationTime += execMs;
+                    this.numOfSyncs ++;
+                    this.syncTime += execMs;
                 } else {
                     continueRun = false;
                     this.dbConnection.close();
@@ -67,8 +67,10 @@ public class GraphThread implements Runnable {
             }
         }
         System.out.println("Synchronization thread for graph "+this.graphName+" stopped succesfully.");
-        System.out.println("Total number of synchronizations : "+this.numOfSynchronizations);
-        System.out.println("Total synchronization time (ms)  : "+this.synchronizationTime);
-        Main.numberOfThreads--;
+        System.out.println("Total number of synchronizations : "+this.numOfSyncs);
+        System.out.println("Total synchronization time (ms)  : "+this.syncTime);
+        Main.PGX_NUMBER_OF_THREADS--;
+        Main.PGX_TOTAL_SYNC_TIME += this.syncTime;
+        Main.PGX_TOTAL_NUMBER_OF_SYNCS += this.numOfSyncs;
     }
 }

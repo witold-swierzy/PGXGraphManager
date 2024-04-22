@@ -20,6 +20,7 @@ public class GraphThread implements Runnable {
         this.dbConnection  = DriverManager.getConnection(Main.PGX_JDBC_URL, Main.PGX_USERNAME, Main.PGX_PASSWORD);
         this.dbConnection.setAutoCommit(false);
         this.pgxConnection = Main.PGX_INSTANCE.createSession(this.graphName);
+        this.pgxConnection.getI
         this.graph         = this.pgxConnection.readGraphByName(this.graphName, GraphSource.PG_VIEW);
         this.graph.publishWithSnapshots();
         this.synchronizer  = new Synchronizer.Builder<FlashbackSynchronizer>()
@@ -34,6 +35,10 @@ public class GraphThread implements Runnable {
         System.out.println("Graph "+graphName+" initialized successfully.");
     }
 
+    public PgxGraph getGraph() {
+        return this.graph;
+    }
+
     public void run() {
         long startMs, execMs;
         boolean continueRun = true;
@@ -41,9 +46,9 @@ public class GraphThread implements Runnable {
              stopThreadLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".stoplabel");
         while (continueRun) {
             try {
-                while ( !syncLabel.exists() &&
-                        !stopThreadLabel.exists() &&
-                        !Main.PGX_STOP_PGM_LABEL.exists() )
+                while (!syncLabel.exists() &&
+                       !stopThreadLabel.exists() &&
+                       !Main.PGX_STOP_PGM_LABEL.exists())
                     Thread.sleep(1000);
                 if (syncLabel.exists()) {
                     System.out.println("Synchronization for graph "+this.graphName+" started.");
@@ -52,18 +57,19 @@ public class GraphThread implements Runnable {
                     syncLabel.delete();
                     execMs = System.currentTimeMillis() - startMs;
                     System.out.println("Graph "+this.graphName+" synchronized successfully.");
-                    System.out.println("Synchronization time : "+execMs);
-                    System.out.println("Number of vertices   : "+this.graph.getNumVertices());
-                    System.out.println("Number of edges      : "+this.graph.getNumEdges());
+                    System.out.println(this.graph);
+                    System.out.println("Synchronization time (ms) : "+execMs);
                     this.numOfSyncs ++;
                     this.syncTime += execMs;
                 } else if (stopThreadLabel.exists()) {
                     continueRun = false;
+                    this.graph.destroy();
                     this.dbConnection.close();
                     this.pgxConnection.close();
                     stopThreadLabel.delete();
                 } else {
                     continueRun = false;
+                    this.graph.destroy();
                     this.dbConnection.close ();
                     this.pgxConnection.close();
                 }

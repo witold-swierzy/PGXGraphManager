@@ -2,7 +2,6 @@ package pg.oracle;
 
 import oracle.pg.rdbms.GraphServer;
 import oracle.pgx.api.*;
-
 import java.io.File;
 import java.sql.DriverManager;
 
@@ -17,6 +16,7 @@ public class Main {
     static String         PGX_JDBC_URL;
     static ServerInstance PGX_INSTANCE;
     static Thread[]       PGX_THREADS;
+    static GraphThread[]  PGX_GRAPHS;
     static long           PGX_TOTAL_SYNC_TIME = 0;
     static long           PGX_TOTAL_NUMBER_OF_SYNCS = 0;
     static long           PGX_NUMBER_OF_THREADS = 0;
@@ -47,11 +47,12 @@ public class Main {
             PGX_INSTANCE.startEngine();
         }
         PGX_THREADS = new Thread[PGX_GRAPH_NAMES.length];
+        PGX_GRAPHS  = new GraphThread[PGX_GRAPH_NAMES.length];
         for (int i = 0; i < PGX_GRAPH_NAMES.length; i++ ) {
-            PGX_THREADS[i] = new Thread(new GraphThread(PGX_GRAPH_NAMES[i]));
+            PGX_GRAPHS[i]  = new GraphThread(PGX_GRAPH_NAMES[i]);
+            PGX_THREADS[i] = new Thread(PGX_GRAPHS[i]);
             PGX_THREADS[i].start();
         }
-
     }
 
     public static void main(String[] args) {
@@ -64,7 +65,11 @@ public class Main {
                 Thread.sleep(1000);
             }
             System.out.println("\nInitialization completed successfully.");
-            System.out.println("Number of graphs/threads : "+PGX_NUMBER_OF_THREADS);
+            System.out.println("Number of initalized graphs/threads : "+PGX_NUMBER_OF_THREADS);
+            System.out.println("Graphs : ");
+            for ( int i=0; i<PGX_THREADS.length; i++)
+                System.out.println("   "+PGX_GRAPHS[i].getGraph());
+            System.out.println("Initialization time (ms)            : "+(System.currentTimeMillis()-PGX_UPTIME));
             while (PGX_NUMBER_OF_THREADS > 0)
                 Thread.sleep(1000);
             if ( PGX_STOP_PGM_LABEL.exists() )

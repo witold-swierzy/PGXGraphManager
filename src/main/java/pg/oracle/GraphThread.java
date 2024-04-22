@@ -20,7 +20,6 @@ public class GraphThread implements Runnable {
         this.dbConnection  = DriverManager.getConnection(Main.PGX_JDBC_URL, Main.PGX_USERNAME, Main.PGX_PASSWORD);
         this.dbConnection.setAutoCommit(false);
         this.pgxConnection = Main.PGX_INSTANCE.createSession(this.graphName);
-        this.pgxConnection.getI
         this.graph         = this.pgxConnection.readGraphByName(this.graphName, GraphSource.PG_VIEW);
         this.graph.publishWithSnapshots();
         this.synchronizer  = new Synchronizer.Builder<FlashbackSynchronizer>()

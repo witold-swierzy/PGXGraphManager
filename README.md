@@ -1,10 +1,11 @@
 # Property Graph Manager
 
 This repository contains source code of a small Java application, which can be used to synchronize published property graphs with tables used in their definitions.
-This application supports synchronization of multiple graphs loaded and published in a single one PGX server instance; every graph is maintained in a separate thread. Threads check for existence of three label files in a directory pointed by PGX_LABEL_DIR environment variable:
+This application supports synchronization of multiple graphs loaded and published in a single one PGX server instance; every graph is maintained in a separate thread. Threads check for existence of four label files in a directory pointed by PGX_LABEL_DIR environment variable:
 * <B>GraphName.synclabel</B> - if this file is created, then the next synchronization for the graph maintained in this thread starts
 * <B>GraphName.stoplabel</B> - if this file is created, then the thread maintaining the graph with <GraphName> name releases all resources, stops synchronizing the graph and quits.
-* <B>pgm.stoplabel</B> - if this file is created, then all threads stop synchronizing their graphs, release all resources and quits.  
+* <B>pgm.stoplabel</B> - if this file is created, then all threads stop synchronizing their graphs, release all resources and quits.
+* <B>pgm.showlabel</B> - if this file is created, then PGM displays basic system information.
 
 Requirements:
 * JDK18

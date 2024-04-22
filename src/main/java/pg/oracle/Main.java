@@ -64,7 +64,14 @@ public class Main {
         long minutes = seconds / 60;
         long hours = minutes / 60;
         long days = hours / 24;
-        return days + " days, " + hours % 24 + " hours, " + minutes % 60 + " minutes, " + seconds % 60 + " seconds";
+        return days + " days:" + hours % 24 + " hours:" + minutes % 60 + " minutes:" + seconds % 60 + " seconds";
+    }
+
+    static void printSummary() {
+        System.out.println("Number of maintained graphs/threads : " + PGX_THREADS.length);
+        System.out.println("Total sync operations               : " + PGX_TOTAL_NUMBER_OF_SYNCS);
+        System.out.println("Sync time                           : " + getFormattedTime(PGX_TOTAL_SYNC_TIME));
+        System.out.println("Uptime                              : " + getFormattedTime(System.currentTimeMillis() - PGX_STARTTIME)+"\n");
     }
 
     public static void main(String[] args) {
@@ -77,28 +84,26 @@ public class Main {
                 Thread.sleep(1000);
             }
             System.out.println("\nInitialization completed successfully.");
-            System.out.println("Number of initalized graphs/threads : "+PGX_NUMBER_OF_THREADS);
             System.out.println("Graphs : ");
-            for ( int i=0; i<PGX_THREADS.length; i++)
-                System.out.println("   "+PGX_GRAPHS[i].getGraph());
-            System.out.println("Initialization time (ms)            : "+(System.currentTimeMillis()-PGX_STARTTIME));
-            while (PGX_NUMBER_OF_THREADS > 0)
+            for (int i = 0; i < PGX_THREADS.length; i++)
+                System.out.println("   " + PGX_GRAPHS[i].getGraph());
+            printSummary();
+            while (PGX_NUMBER_OF_THREADS > 0) {
                 if (PGX_DATA_DISP_LABEL.exists()) {
-                    System.out.println("Number of initalized graphs/threads : "+PGX_NUMBER_OF_THREADS);
                     System.out.println("Graphs : ");
-                    for ( int i=0; i<PGX_THREADS.length; i++)
-                        System.out.println("   "+PGX_GRAPHS[i].getGraph());
-                    System.out.println("Uptime (ms)            : "+getFormattedTime(System.currentTimeMillis()-PGX_STARTTIME));
+                    for (int i = 0; i < PGX_THREADS.length; i++)
+                        System.out.println("   " + PGX_GRAPHS[i].getGraph() +
+                                ", #syncs : " + PGX_GRAPHS[i].getNumOfSyncs() +
+                                ", sync time : " + getFormattedTime(PGX_GRAPHS[i].getSyncTime()));
+                    printSummary();
                     PGX_DATA_DISP_LABEL.delete();
                 }
                 Thread.sleep(1000);
-            if ( PGX_STOP_PGM_LABEL.exists() )
-                PGX_STOP_PGM_LABEL.delete();
+            }
             System.out.println("All threads stopped. PropertyGraphManager stopped in clean mode.");
-            System.out.println("Total number of synchronization threads             : "+PGX_THREADS.length);
-            System.out.println("Total number of synchronizations in all threads     : "+PGX_TOTAL_NUMBER_OF_SYNCS);
-            System.out.println("Total time spent on synchronizations in all threads : "+PGX_TOTAL_SYNC_TIME);
-            System.out.println("Uptime : "+getFormattedTime(System.currentTimeMillis() - PGX_STARTTIME));
+            if (PGX_STOP_PGM_LABEL.exists())
+                PGX_STOP_PGM_LABEL.delete();
+            printSummary();
         }
         catch(Exception e) {e.printStackTrace();}
     }

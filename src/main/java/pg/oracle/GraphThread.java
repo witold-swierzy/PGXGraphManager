@@ -12,11 +12,22 @@ public class GraphThread implements Runnable {
     private PgxSession pgxConnection;
     private PgxGraph graph;
     private Synchronizer synchronizer;
+    private File syncLabel, stopLabel;
     private long numOfSyncs = 0,
                  syncTime   = 0;
     public GraphThread(String graphName) throws Exception {
         System.out.println("Initializing thread for graph : "+graphName);
-        this.graphName     = graphName;
+        this.graphName = graphName;
+        this.syncLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".synclabel");
+        this.stopLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".stoplabel");
+        if (syncLabel.exists() || stopLabel.exists()) {
+            System.out.println("  Previous shutdown was not clean, cleaning the thread.");
+            if (syncLabel.exists())
+                syncLabel.delete();
+            if (stopLabel.exists())
+                stopLabel.delete();
+        }
+        System.out.println("Thread is clean.");
         this.dbConnection  = DriverManager.getConnection(Main.PGX_JDBC_URL, Main.PGX_USERNAME, Main.PGX_PASSWORD);
         this.dbConnection.setAutoCommit(false);
         this.pgxConnection = Main.PGX_INSTANCE.createSession(this.graphName);
@@ -31,7 +42,15 @@ public class GraphThread implements Runnable {
                         .fromJson(this.graph.getConfig().toString()))
                 .build();
         Main.PGX_NUMBER_OF_THREADS++;
-        System.out.println("Graph "+graphName+" initialized successfully.");
+        System.out.println("Graph "+graphName+" initialized successfully.\n");
+    }
+
+    public long getNumOfSyncs() {
+        return this.numOfSyncs;
+    }
+
+    public long getSyncTime () {
+        return this.syncTime;
     }
 
     public PgxGraph getGraph() {
@@ -41,38 +60,37 @@ public class GraphThread implements Runnable {
     public void run() {
         long startMs, execMs;
         boolean continueRun = true;
-        File syncLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".synclabel"),
-             stopThreadLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".stoplabel");
         while (continueRun) {
             try {
                 while (!syncLabel.exists() &&
-                       !stopThreadLabel.exists() &&
+                       !stopLabel.exists() &&
                        !Main.PGX_STOP_PGM_LABEL.exists())
                     Thread.sleep(1000);
                 if (syncLabel.exists()) {
-                    System.out.println("Synchronization for graph "+this.graphName+" started.");
+                    System.out.println("Synchronization for graph " + this.graphName + " started.");
                     startMs = System.currentTimeMillis();
                     this.graph = this.synchronizer.sync();
                     syncLabel.delete();
                     execMs = System.currentTimeMillis() - startMs;
-                    System.out.println("Graph "+this.graphName+" synchronized successfully.");
+                    System.out.println("Graph " + this.graphName + " synchronized successfully.");
                     System.out.println(this.graph);
-                    System.out.println("Synchronization time (ms) : "+execMs);
-                    this.numOfSyncs ++;
+                    System.out.println("Synchronization time (ms) : " + execMs + "\n");
+                    this.numOfSyncs++;
                     this.syncTime += execMs;
-                } else if (stopThreadLabel.exists()) {
+                } else if (stopLabel.exists()) {
                     continueRun = false;
                     this.graph.destroy();
                     this.dbConnection.close();
                     this.pgxConnection.close();
-                    stopThreadLabel.delete();
+                    stopLabel.delete();
                 } else {
                     continueRun = false;
                     this.graph.destroy();
-                    this.dbConnection.close ();
+                    this.dbConnection.close();
                     this.pgxConnection.close();
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 e.printStackTrace();
                 continueRun = false;
             }

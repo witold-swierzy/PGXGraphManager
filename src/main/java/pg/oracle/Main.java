@@ -20,7 +20,8 @@ public class Main {
     static long           PGX_TOTAL_SYNC_TIME = 0;
     static long           PGX_TOTAL_NUMBER_OF_SYNCS = 0;
     static long           PGX_NUMBER_OF_THREADS = 0;
-    static long           PGX_UPTIME = System.currentTimeMillis();
+    static long           PGX_STARTTIME = System.currentTimeMillis();
+    static File           PGX_DATA_DISP_LABEL;
 
     public static void initApp() throws Exception {
         PGX_RELOAD         = Boolean.parseBoolean(System.getenv("PGX_RELOAD")
@@ -29,9 +30,12 @@ public class Main {
                                    .replace("\"","");
         PGX_LABEL_DIR      = System.getenv("PGX_LABEL_DIR")
                                    .replace("\"","");
-        PGX_STOP_PGM_LABEL = new File(Main.PGX_LABEL_DIR
+        PGX_STOP_PGM_LABEL = new File(PGX_LABEL_DIR
                                       +System.getProperty("file.separator")
                                       +"pgm.stoplabel");
+        PGX_DATA_DISP_LABEL = new File(PGX_LABEL_DIR
+                                      +System.getProperty("file.separator")
+                                      +"pgm.showlabel");
         PGX_JDBC_URL       = System.getenv("PGX_JDBC_URL")
                                    .replace("\"","");
         PGX_USERNAME       = System.getenv("PGX_USERNAME")
@@ -55,6 +59,14 @@ public class Main {
         }
     }
 
+    static String getFormattedTime(long timeInMS) {
+        long seconds = timeInMS / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+        return days + " days, " + hours % 24 + " hours, " + minutes % 60 + " minutes, " + seconds % 60 + " seconds";
+    }
+
     public static void main(String[] args) {
         try {
             System.out.println("Initializing PropertyGraphManager...");
@@ -69,22 +81,24 @@ public class Main {
             System.out.println("Graphs : ");
             for ( int i=0; i<PGX_THREADS.length; i++)
                 System.out.println("   "+PGX_GRAPHS[i].getGraph());
-            System.out.println("Initialization time (ms)            : "+(System.currentTimeMillis()-PGX_UPTIME));
+            System.out.println("Initialization time (ms)            : "+(System.currentTimeMillis()-PGX_STARTTIME));
             while (PGX_NUMBER_OF_THREADS > 0)
+                if (PGX_DATA_DISP_LABEL.exists()) {
+                    System.out.println("Number of initalized graphs/threads : "+PGX_NUMBER_OF_THREADS);
+                    System.out.println("Graphs : ");
+                    for ( int i=0; i<PGX_THREADS.length; i++)
+                        System.out.println("   "+PGX_GRAPHS[i].getGraph());
+                    System.out.println("Uptime (ms)            : "+getFormattedTime(System.currentTimeMillis()-PGX_STARTTIME));
+                    PGX_DATA_DISP_LABEL.delete();
+                }
                 Thread.sleep(1000);
             if ( PGX_STOP_PGM_LABEL.exists() )
                 PGX_STOP_PGM_LABEL.delete();
-            PGX_UPTIME = System.currentTimeMillis() - PGX_UPTIME;
-            long seconds = PGX_UPTIME / 1000;
-            long minutes = seconds / 60;
-            long hours = minutes / 60;
-            long days = hours / 24;
-            String time = days + " days, " + hours % 24 + " hours, " + minutes % 60 + " minutes, " + seconds % 60 + " seconds";
             System.out.println("All threads stopped. PropertyGraphManager stopped in clean mode.");
             System.out.println("Total number of synchronization threads             : "+PGX_THREADS.length);
             System.out.println("Total number of synchronizations in all threads     : "+PGX_TOTAL_NUMBER_OF_SYNCS);
             System.out.println("Total time spent on synchronizations in all threads : "+PGX_TOTAL_SYNC_TIME);
-            System.out.println("Uptime : "+time);
+            System.out.println("Uptime : "+getFormattedTime(System.currentTimeMillis() - PGX_STARTTIME));
         }
         catch(Exception e) {e.printStackTrace();}
     }

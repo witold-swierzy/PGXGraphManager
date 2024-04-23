@@ -16,18 +16,18 @@ public class GraphThread implements Runnable {
     private long numOfSyncs = 0,
                  syncTime   = 0;
     public GraphThread(String graphName) throws Exception {
-        System.out.println("Initializing thread for graph : "+graphName);
+        Util.printMessage("GraphThread","GraphThread",graphName,"Graph initialization started");
         this.graphName = graphName;
         this.syncLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".synclabel");
         this.stopLabel = new File(Main.PGX_LABEL_DIR+System.getProperty("file.separator")+this.graphName+".stoplabel");
         if (syncLabel.exists() || stopLabel.exists()) {
-            System.out.println("  Previous shutdown was not clean, cleaning the thread.");
+            Util.printMessage("GraphThread","GraphThread",this.graphName,"Previous shutdown was not clean, cleaning the thread.");
             if (syncLabel.exists())
                 syncLabel.delete();
             if (stopLabel.exists())
                 stopLabel.delete();
         }
-        System.out.println("Thread is clean.");
+        Util.printMessage("GraphThread","GraphThread",this.graphName,"Thread is clean.");
         this.dbConnection  = DriverManager.getConnection(Main.PGX_JDBC_URL, Main.PGX_USERNAME, Main.PGX_PASSWORD);
         this.dbConnection.setAutoCommit(false);
         this.pgxConnection = Main.PGX_INSTANCE.createSession(this.graphName);
@@ -42,7 +42,7 @@ public class GraphThread implements Runnable {
                         .fromJson(this.graph.getConfig().toString()))
                 .build();
         Main.PGX_NUMBER_OF_THREADS++;
-        System.out.println("Graph "+graphName+" initialized successfully.\n");
+        Util.printMessage("GraphThread","GraphThread",this.graphName,"Graph initialized successfully.\n");
     }
 
     public long getNumOfSyncs() {
@@ -67,14 +67,14 @@ public class GraphThread implements Runnable {
                        !Main.PGX_STOP_PGM_LABEL.exists())
                     Thread.sleep(1000);
                 if (syncLabel.exists()) {
-                    System.out.println("Synchronization for graph " + this.graphName + " started.");
+                    Util.printMessage("GraphThread","run",this.graphName,"Graph synchronization started.");
                     startMs = System.currentTimeMillis();
                     this.graph = this.synchronizer.sync();
                     syncLabel.delete();
                     execMs = System.currentTimeMillis() - startMs;
-                    System.out.println("Graph " + this.graphName + " synchronized successfully.");
+                    Util.printMessage("GraphThread","run",this.graphName,"Graph synchronized successfully.");
                     System.out.println(this.graph);
-                    System.out.println("Synchronization time (ms) : " + execMs + "\n");
+                    Util.printMessage("GraphThread","run",this.graphName,"Synchronization time (ms) : " + execMs + "\n");
                     this.numOfSyncs++;
                     this.syncTime += execMs;
                 } else if (stopLabel.exists()) {
@@ -95,9 +95,9 @@ public class GraphThread implements Runnable {
                 continueRun = false;
             }
         }
-        System.out.println("Synchronization thread for graph "+this.graphName+" stopped successfully.");
-        System.out.println("Total number of synchronizations : "+this.numOfSyncs);
-        System.out.println("Total synchronization time (ms)  : "+this.syncTime);
+        Util.printMessage("GraphThread","run",this.graphName,"Synchronization thread for graph "+this.graphName+" stopped successfully.");
+        Util.printMessage("GraphThread","run",this.graphName,"Total number of synchronizations : "+this.numOfSyncs);
+        Util.printMessage("GraphThread","run",this.graphName,"Total synchronization time (ms)  : "+this.syncTime);
         Main.PGX_NUMBER_OF_THREADS--;
         Main.PGX_TOTAL_SYNC_TIME += this.syncTime;
         Main.PGX_TOTAL_NUMBER_OF_SYNCS += this.numOfSyncs;

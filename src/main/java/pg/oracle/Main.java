@@ -59,48 +59,41 @@ public class Main {
         }
     }
 
-    static String getFormattedTime(long timeInMS) {
-        long seconds = timeInMS / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
-        return days + " days:" + hours % 24 + " hours:" + minutes % 60 + " minutes:" + seconds % 60 + " seconds";
-    }
-
     static void printSummary() {
-        System.out.println("Number of maintained graphs/threads : " + PGX_THREADS.length);
-        System.out.println("Total sync operations               : " + PGX_TOTAL_NUMBER_OF_SYNCS);
-        System.out.println("Sync time                           : " + getFormattedTime(PGX_TOTAL_SYNC_TIME));
-        System.out.println("Uptime                              : " + getFormattedTime(System.currentTimeMillis() - PGX_STARTTIME)+"\n");
+        Util.printMessage("Main","main","Number of maintained graphs/threads : " + PGX_THREADS.length);
+        Util.printMessage("Main","main","Total sync operations               : " + PGX_TOTAL_NUMBER_OF_SYNCS);
+        Util.printMessage("Main","main","Sync time                           : " + Util.getFormattedTime(PGX_TOTAL_SYNC_TIME));
+        Util.printMessage("Main","main","Uptime                              : " + Util.getFormattedTime(System.currentTimeMillis() - PGX_STARTTIME)+"\n");
     }
 
     public static void main(String[] args) {
         try {
-            System.out.println("Initializing PropertyGraphManager...");
+            Util.printMessage("Main","main","Initializing PropertyGraphManager...");
             initApp();
-            System.out.print("Waiting for all threads to finish their initialization processes.");
+            Util.printMessage("Main","main","Waiting for all threads to finish their initialization processes.");
             while (PGX_NUMBER_OF_THREADS != PGX_THREADS.length) {
                 System.out.print(".");
                 Thread.sleep(1000);
             }
-            System.out.println("\nInitialization completed successfully.");
-            System.out.println("Graphs : ");
+            System.out.println("\n");
+            Util.printMessage("Main","main","Initialization completed successfully.");
+            Util.printMessage("Main","main","Graphs : ");
             for (int i = 0; i < PGX_THREADS.length; i++)
-                System.out.println("   " + PGX_GRAPHS[i].getGraph());
+                Util.printMessage("Main","main","   " + PGX_GRAPHS[i].getGraph());
             printSummary();
             while (PGX_NUMBER_OF_THREADS > 0) {
                 if (PGX_DATA_DISP_LABEL.exists()) {
                     System.out.println("Graphs : ");
                     for (int i = 0; i < PGX_THREADS.length; i++)
-                        System.out.println("   " + PGX_GRAPHS[i].getGraph() +
+                        Util.printMessage("Main","main","   " + PGX_GRAPHS[i].getGraph() +
                                 ", #syncs : " + PGX_GRAPHS[i].getNumOfSyncs() +
-                                ", sync time : " + getFormattedTime(PGX_GRAPHS[i].getSyncTime()));
+                                ", sync time : " + Util.getFormattedTime(PGX_GRAPHS[i].getSyncTime()));
                     printSummary();
                     PGX_DATA_DISP_LABEL.delete();
                 }
                 Thread.sleep(1000);
             }
-            System.out.println("All threads stopped. PropertyGraphManager stopped in clean mode.");
+            Util.printMessage("Main","main","All threads stopped. PropertyGraphManager stopped in clean mode.");
             if (PGX_STOP_PGM_LABEL.exists())
                 PGX_STOP_PGM_LABEL.delete();
             printSummary();

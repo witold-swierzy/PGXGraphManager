@@ -73,7 +73,7 @@ public class GraphThread implements Runnable {
                     syncLabel.delete();
                     execMs = System.currentTimeMillis() - startMs;
                     Util.printMessage("GraphThread","run",this.graphName,"Graph synchronized successfully.");
-                    System.out.println(this.graph);
+                    Util.printMessage("GraphThread","run",this.graphName,this.graph.toString());
                     Util.printMessage("GraphThread","run",this.graphName,"Synchronization time (ms) : " + execMs + "\n");
                     this.numOfSyncs++;
                     this.syncTime += execMs;

@@ -5,6 +5,7 @@ import oracle.pgx.config.GraphConfigFactory;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Map;
 
 public class GraphThread implements Runnable {
     private String graphName;
@@ -32,7 +33,8 @@ public class GraphThread implements Runnable {
         this.dbConnection.setAutoCommit(false);
         this.pgxConnection = Main.PGX_INSTANCE.createSession(this.graphName);
         this.graph         = this.pgxConnection.readGraphByName(this.graphName, GraphSource.PG_VIEW);
-        this.graph.publishWithSnapshots();
+        this.graph.publishWithSnapshots(VertexProperty.ALL,EdgeProperty.ALL);
+        this.graph.pin();
         this.synchronizer  = new Synchronizer.Builder<FlashbackSynchronizer>()
                 .setType(FlashbackSynchronizer.class)
                 .setGraph(this.graph)

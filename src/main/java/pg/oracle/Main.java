@@ -6,8 +6,10 @@ import java.io.File;
 import java.sql.DriverManager;
 
 public class Main {
+    static String         PGX_EXECUTION_MODE;
     static boolean        PGX_RELOAD;
     static String         PGX_LABEL_DIR;
+    static String         PGX_CONFIG_DIR;
     static File           PGX_STOP_PGM_LABEL;
     static String         PGX_URL;
     static String         PGX_USERNAME;
@@ -24,11 +26,15 @@ public class Main {
     static File           PGX_DATA_DISP_LABEL;
 
     public static void initApp() throws Exception {
+        PGX_EXECUTION_MODE = System.getenv("PGX_EXECUTION_MODE")
+                                   .replace("\"","");
         PGX_RELOAD         = Boolean.parseBoolean(System.getenv("PGX_RELOAD")
-                                                        .replace("\"",""));
+                                                       .replace("\"",""));
         PGX_URL            = System.getenv("PGX_URL")
                                    .replace("\"","");
         PGX_LABEL_DIR      = System.getenv("PGX_LABEL_DIR")
+                                   .replace("\"","");
+        PGX_CONFIG_DIR     = System.getenv("PGX_CONFIG_DIR")
                                    .replace("\"","");
         PGX_STOP_PGM_LABEL = new File(PGX_LABEL_DIR
                                       +System.getProperty("file.separator")
@@ -62,18 +68,22 @@ public class Main {
     static void printSummary() {
         Util.printMessage("Main","main","Number of maintained graphs/threads : " + PGX_THREADS.length);
         Util.printMessage("Main","main","Total sync operations               : " + PGX_TOTAL_NUMBER_OF_SYNCS);
-        Util.printMessage("Main","main","Sync time                           : " + Util.getFormattedTime(PGX_TOTAL_SYNC_TIME));
-        Util.printMessage("Main","main","Uptime                              : " + Util.getFormattedTime(System.currentTimeMillis() - PGX_STARTTIME)+"\n");
+        Util.printMessage("Main","main","Execution mode                      : "+PGX_EXECUTION_MODE);
+        Util.printMessage("Main","main","Total sync time                     : " + Util.getFormattedTime(PGX_TOTAL_SYNC_TIME));
+        if (PGX_EXECUTION_MODE.equals("BACKGROUND"))
+            Util.printMessage("Main","main","Uptime                              : " + Util.getFormattedTime(System.currentTimeMillis() - PGX_STARTTIME)+"\n");
     }
 
     public static void main(String[] args) {
         try {
             Util.printMessage("Main","main","Initializing PropertyGraphManager...");
             initApp();
-            Util.printMessage("Main","main","Waiting for all threads to finish their initialization processes.");
-            while (PGX_NUMBER_OF_THREADS != PGX_THREADS.length) {
-                System.out.print(".");
-                Thread.sleep(1000);
+            if ( PGX_EXECUTION_MODE.equals("BACKGROUND")) {
+                Util.printMessage("Main", "main", "Waiting for all threads to finish their initialization processes.");
+                while (PGX_NUMBER_OF_THREADS != PGX_THREADS.length) {
+                    System.out.print(".");
+                    Thread.sleep(1000);
+                }
             }
             System.out.println("\n");
             Util.printMessage("Main","main","Initialization completed successfully.");

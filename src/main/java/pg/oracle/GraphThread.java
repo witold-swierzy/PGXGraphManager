@@ -81,7 +81,8 @@ public class GraphThread implements Runnable {
         Util.printMessage("GraphThread","run",this.graphName,"Graph synchronization started.");
         startMs = System.currentTimeMillis();
         this.graph = this.synchronizer.sync();
-        syncLabel.delete();
+        if (syncLabel.exists())
+            syncLabel.delete();
         execMs = System.currentTimeMillis() - startMs;
         Util.printMessage("GraphThread","run",this.graphName,"Graph synchronized successfully.");
         Util.printMessage("GraphThread","run",this.graphName,this.graph.toString());
@@ -129,7 +130,10 @@ public class GraphThread implements Runnable {
             Util.printMessage("GraphThread", "run", this.graph.toString());
         }
         else {
-            Util.printMessage("GraphThread", "run", this.graphName, "Graph " + this.graphName + " synchronization/loading completed successfully.");
+            if ( this.preloaded )
+                Util.printMessage("GraphThread", "run", this.graphName, "Graph " + this.graphName + " synchronized successfully.");
+            else
+                Util.printMessage("GraphThread", "run", this.graphName, "Graph " + this.graphName + " loaded successfully.");
             Util.printMessage("GraphThread", "run", this.graphName, "Execution time (ms)  : " + this.syncTime);
             Util.printMessage("GraphThread", "run", this.graph.toString());
         }

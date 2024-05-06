@@ -30,6 +30,7 @@ public class Main {
                                    .replace("\"","");
         PGX_RELOAD         = Boolean.parseBoolean(System.getenv("PGX_RELOAD")
                                                        .replace("\"",""));
+        //PGX_RELOAD = false;
         PGX_URL            = System.getenv("PGX_URL")
                                    .replace("\"","");
         PGX_LABEL_DIR      = System.getenv("PGX_LABEL_DIR")
